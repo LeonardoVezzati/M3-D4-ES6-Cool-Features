@@ -11,21 +11,47 @@
   <!--Bootstrap-->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
   <!--End Bootstrap-->
+  <!--Fontawesome-->
+  <script src="https://kit.fontawesome.com/cf8ccbb757.js" crossorigin="anonymous"></script>
+  <!--End Fontawesome-->
 </head>
 <body>
   <div class="container">
     <h1 class="text-center mt-5">Welcome to Strive School Books Library</h1>
-    <div class="text-center">
-      <button class="btn addToCartButton text-center mt-3" onclick="loadBooks()">Load the books</button>
-    </div>
-    <div id="booksMainRow" class="row mt-5">
-  
-    </div>
-    <div id="cartBox">
-      <div class="cartContainer">
-        <h2 class="text-center mt-5">This is a cart</h2>
-
+    <div class="row mt-5">
+      <div class="col-6">
+        <div class="text-center">
+          <button class="btn mainButton text-center mt-3" onclick="displayBooks()">Load the books</button>
+        </div>
       </div>
+      <div class="col-6">
+        <div class="text-center">
+          <button class="btn mainButton text-center mt-3">Clean the library</button>
+        </div>
+      </div>
+      <div class="col-12 mt-2">
+        <div class="text-center d-flex mt-3">
+          <input type="search" placeholder="Type your search..." class="flex-grow-1 inputSearch">
+          <input type="submit" class="btn submitButton" onclick="search()" value="Search">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-8">
+        <div id="books-wrapper" class="row mt-5">
+      
+        </div>
+      </div>
+      <div class="col-4 mt-5">
+        <div class="cartContainer">
+          <h2 class="text-center cartTitle">Cart</h2>
+          <div class="container">
+            <div id="shopping-cart" class="row mt-5">
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
   <!--
@@ -49,58 +75,121 @@
         -->
 
         <script>
-          function loadBooks() {
-            console.log("the button has been clicked")
-            fetch("https://striveschool-api.herokuapp.com/books")
-                .then(resp => resp.json()) // transform the response body in a JSON object
-                .then(books => {
-                    const booksMainRow = document.querySelector("#booksMainRow")
-                    booksMainRow.innerText = ""
-                    for(let i = 0; i < books.length; i++) {
-                        const book = books[i]
-                        //add the book to the row!
-                        // create a <div class="col col-md-3">
-                        const bookContainer = document.createElement('div')
-                        bookContainer.classList.add("col-12")
-                        bookContainer.classList.add("col-sm-6")
-                        bookContainer.classList.add("col-md-4")
-                        bookContainer.classList.add("col-lg-3")
-                        bookContainer.classList.add("col-xl-2")
-                        bookContainer.classList.add("p-2")
-                        const bookDiv = document.createElement("div")
-                        bookDiv.classList.add('bookDiv')
-                        const bookCover = document.createElement("img")
-                        bookCover.src = book.img
-                        bookCover.classList.add("img-fluid")
-                        bookCover.classList.add("bookCoverImage")
-                        const addToCartButton = document.createElement('button')
-                        addToCartButton.innerText = "Add to cart"
-                        addToCartButton.classList.add("btn")
-                        addToCartButton.classList.add("addToCartButton")
-                        addToCartButton.classList.add("text-center")
+          const booksWrapper = document.querySelector("#books-wrapper");
+          const shoppingCart = document.querySelector("#shopping-cart");
+    
+          window.onload = () => {
+            loadBooks();
+          };
+    
+          let books = [];
+          let shoppingCartList = [];
+          let filteredBooks = [];
 
-                        addToCartButton.classList.add("mt-3")
-                        addToCartButton.addEventListener('onclick', () => addToCartFunction())
-                        // img.addEventListener('load', () => console.log("test"))
-                        bookDiv.appendChild(bookCover)
-                        bookDiv.appendChild(addToCartButton)
-                        bookContainer.appendChild(bookDiv)
-                        booksMainRow.appendChild(bookContainer)
-                    }
-                })
-                .catch(err => {
-                    const booksMainRow = document.querySelector("#booksMainRow")
-                    booksMainRow.innerText = "Cannot load the books list"
-                    console.log("THIS IS THE CATCH CLAUSE", err)
-                })
-            console.log("this will be executed before the fetch callback")
-        }
-        </script>
-        <script>
-          function addToCartFunction(){
-            bookCover.classList
+          function loadBooks() {
+            fetch("https://striveschool-api.herokuapp.com/books")
+              .then((r) => r.json())
+              .then((_books) => {
+                books = _books;
+                console.log(books);
+                displayBooks();
+              })
+              .catch((err) => console.error(err.message));
+          }
+    
+          function displayBooks(_books = books) {
+            booksWrapper.innerHTML = "";
+    
+            _books.forEach((book) => {
+              booksWrapper.innerHTML += `
+                <div class="col-12 col-sm-6">
+                  <div class="card mb-4">
+                    <img src="${book.img}" class="img-fluid card-img-top" alt="${
+                      book.title
+                    }">
+                    <div class="card-body">
+                      <h5 class="card-title">${book.title}</h5>
+                      <p class="card-text">${book.category}</p>
+                      <button class="btn addToCartButton" onclick="addToCart('${String(
+                        book.asin
+                      )}', this)">$${book.price}</button>
+                      <button class="btn btn-warning" onclick="this.closest('.col-12').remove()">
+                        <i class="far fa-trash-alt"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
+          }
+    
+          function addToCart(asin, element) {
+            console.log(asin);
+            // const book = books.filter( book => book.asin === asin)[0]
+            const book = books.find((book) => book.asin == asin);
+            shoppingCartList.push(book);
+            console.log(shoppingCartList);
+    
+            refreshShoppingCart();
+    
+            element.closest(".card").classList.add("selected");
+          }
+    
+          function refreshShoppingCart() {
+            shoppingCart.innerHTML = "";
+    
+            shoppingCartList.forEach((book) => {
+              shoppingCart.innerHTML += `
+                <div class="container">
+                  <div class="row cart-item">
+                    <div class="col-3 p-1">
+                      <img src="${book.img}" class="cartImage">
+                    </div>
+                    <div class="col-6 p-1">
+                      <div>${book.title}</div>
+                      <div>$${book.price}</div>
+                    </div>
+                    <div class="col-3 p-1">
+                      <button class="btn btn-danger" onclick="deleteItem('${String(book.asin)}')">
+                      <i class="far fa-trash-alt"></i></button>
+                    </div>
+                  </div>
+                </div>  
+              `;
+            });
+          }
+    
+          function search(query) {
+            if (query.length < 3) {
+              filteredBooks = books;
+              displayBooks();
+              return;
+            }
+    
+            filteredBooks = books.filter((book) =>
+              book.title.toLowerCase().includes(query.toLowerCase())
+            );
+    
+            console.log(filteredBooks);
+            displayBooks(filteredBooks);
+          }
+    
+          function deleteItem(asin) {
+            const index = shoppingCartList.findIndex((book) => book.asin === asin);
+    
+            if (index !== -1) {
+              shoppingCartList.splice(index, 1);
+            }
+    
+            refreshShoppingCart();
           }
         </script>
+    
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
   <!--Bootsrap-->
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
