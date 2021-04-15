@@ -5,8 +5,29 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <!--CSS-->
+  <link rel="stylesheet" href="stylesheet.css">
+  <!--End CSS-->
+  <!--Bootstrap-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+  <!--End Bootstrap-->
 </head>
 <body>
+  <div class="container">
+    <h1 class="text-center mt-5">Welcome to Strive School Books Library</h1>
+    <div class="text-center">
+      <button class="btn addToCartButton text-center mt-3" onclick="loadBooks()">Load the books</button>
+    </div>
+    <div id="booksMainRow" class="row mt-5">
+  
+    </div>
+    <div id="cartBox">
+      <div class="cartContainer">
+        <h2 class="text-center mt-5">This is a cart</h2>
+
+      </div>
+    </div>
+  </div>
   <!--
             You are creating the "shopping cart experience" for a Online Marketplace.
             You have the list of the available books from the current API:
@@ -26,5 +47,64 @@
             9) Create a second "detail page" for the product. When the user clicks on a product name, the app should redirect him to the secondary page, passing the ASIN in query string
             10) In page "detail" show some details of the selected product (https://striveschool-api.herokuapp.com/books/1940026091 to fetch the details of a specific book)
         -->
+
+        <script>
+          function loadBooks() {
+            console.log("the button has been clicked")
+            fetch("https://striveschool-api.herokuapp.com/books")
+                .then(resp => resp.json()) // transform the response body in a JSON object
+                .then(books => {
+                    const booksMainRow = document.querySelector("#booksMainRow")
+                    booksMainRow.innerText = ""
+                    for(let i = 0; i < books.length; i++) {
+                        const book = books[i]
+                        //add the book to the row!
+                        // create a <div class="col col-md-3">
+                        const bookContainer = document.createElement('div')
+                        bookContainer.classList.add("col-12")
+                        bookContainer.classList.add("col-sm-6")
+                        bookContainer.classList.add("col-md-4")
+                        bookContainer.classList.add("col-lg-3")
+                        bookContainer.classList.add("col-xl-2")
+                        bookContainer.classList.add("p-2")
+                        const bookDiv = document.createElement("div")
+                        bookDiv.classList.add('bookDiv')
+                        const bookCover = document.createElement("img")
+                        bookCover.src = book.img
+                        bookCover.classList.add("img-fluid")
+                        bookCover.classList.add("bookCoverImage")
+                        const addToCartButton = document.createElement('button')
+                        addToCartButton.innerText = "Add to cart"
+                        addToCartButton.classList.add("btn")
+                        addToCartButton.classList.add("addToCartButton")
+                        addToCartButton.classList.add("text-center")
+
+                        addToCartButton.classList.add("mt-3")
+                        addToCartButton.addEventListener('onclick', () => addToCartFunction())
+                        // img.addEventListener('load', () => console.log("test"))
+                        bookDiv.appendChild(bookCover)
+                        bookDiv.appendChild(addToCartButton)
+                        bookContainer.appendChild(bookDiv)
+                        booksMainRow.appendChild(bookContainer)
+                    }
+                })
+                .catch(err => {
+                    const booksMainRow = document.querySelector("#booksMainRow")
+                    booksMainRow.innerText = "Cannot load the books list"
+                    console.log("THIS IS THE CATCH CLAUSE", err)
+                })
+            console.log("this will be executed before the fetch callback")
+        }
+        </script>
+        <script>
+          function addToCartFunction(){
+            bookCover.classList
+          }
+        </script>
+  <!--Bootsrap-->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
+  <!--End Bootsrap-->
+
 </body>
 </html>
